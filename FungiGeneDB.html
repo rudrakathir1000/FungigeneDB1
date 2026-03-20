@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FungiGeneDB — Fungal Transcription Factor & Gene Database</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070d0b;
+    --bg2: #0d1a14;
+    --bg3: #111f18;
+    --bg4: #162619;
+    --surface: #1a2e22;
+    --surface2: #203528;
+    --border: rgba(74,210,140,0.12);
+    --border2: rgba(74,210,140,0.22);
+    --accent: #3dda8a;
+    --accent2: #2ab870;
+    --accent3: #5ee8a2;
+    --teal: #1be8c8;
+    --amber: #f0a94a;
+    --coral: #e8635e;
+    --sky: #4ab8e8;
+    --text: #d9f5e8;
+    --text2: #8dbfa2;
+    --text3: #567868;
+    --mono: 'JetBrains Mono', 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+    --r: 8px;
+    --r2: 12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── GRID BACKGROUND ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(61,218,138,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(61,218,138,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(7,13,11,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 58px;
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+  }
+
+  .nav-btn:hover { background: var(--surface); color: var(--text); }
+  .nav-btn.active { background: rgba(61,218,138,0.12); color: var(--accent); }
+
+  .nav-badge {
+    background: rgba(61,218,138,0.15);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-left: auto;
+  }
+
+  /* ─── PAGES ─── */
+  .page { display: none; position: relative; z-index: 1; }
+  .page.active { display: block; }
+
+  /* ─── HOME ─── */
+  .hero {
+    padding: 80px 2rem 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent2);
+  }
+
+  .hero h1 {
+    font-size: clamp(38px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--text2);
+    max-width: 580px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    font-weight: 400;
+  }
+
+  .hero-search {
+    display: flex;
+    gap: 0;
+    max-width: 620px;
+    margin-bottom: 60px;
+  }
+
+  .hero-search input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-right: none;
+    border-radius: var(--r) 0 0 var(--r);
+    padding: 13px 18px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .hero-search input:focus { border-color: var(--accent); }
+  .hero-search input::placeholder { color: var(--text3); }
+
+  .hero-search button {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 13px 24px;
+    color: var(--bg);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .hero-search button:hover { background: var(--accent3); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+    margin-bottom: 60px;
+  }
+
+  .stat-cell {
+    background: var(--bg2);
+    padding: 24px 20px;
+    transition: background 0.2s;
+  }
+
+  .stat-cell:hover { background: var(--surface); }
+
+  .stat-num {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-family: var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  .see-all {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 5px 12px;
+    color: var(--accent);
+    font-family: var(--sans);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .see-all:hover { background: var(--surface); }
+
+  /* ─── TF FAMILY CARDS ─── */
+  .tf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 60px;
+  }
+
+  .tf-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tf-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.2s;
+    transform-origin: left;
+  }
+
+  .tf-card:hover { border-color: var(--border2); background: var(--surface); }
+  .tf-card:hover::after { transform: scaleX(1); }
+
+  .tf-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+
+  .tag-zinc { background: rgba(74,184,232,0.15); color: var(--sky); }
+  .tag-hth { background: rgba(240,169,74,0.15); color: var(--amber); }
+  .tag-basic { background: rgba(61,218,138,0.15); color: var(--accent); }
+  .tag-wd { background: rgba(232,99,94,0.15); color: var(--coral); }
+  .tag-other { background: rgba(94,232,162,0.15); color: var(--accent3); }
+
+  .tf-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .tf-desc {
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .tf-count {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .tf-count span { color: var(--accent); font-weight: 700; }
+
+  /* ─── BROWSE TABLE ─── */
+  .browse-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 2rem;
+  }
+
+  .browse-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    align-items: center;
+  }
+
+  .filter-input {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 9px 14px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+    width: 260px;
+  }
+
+  .filter-input:focus { border-color: var(--accent); }
+
+  .filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 9px 14px;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .gene-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: var(--r2);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .gene-table thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .gene-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .gene-table th:hover { color: var(--accent); }
+
+  .gene-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+
+  .gene-table tbody tr:hover { background: var(--surface); }
+
+  .gene-table td {
+    padding: 11px 16px;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  .gene-id {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .species-name { font-style: italic; color: var(--text2); }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .pill-teal { background: rgba(27,232,200,0.12); color: var(--teal); }
+  .pill-amber { background: rgba(240,169,74,0.12); color: var(--amber); }
+  .pill-green { background: rgba(61,218,138,0.12); color: var(--accent); }
+  .pill-sky { background: rgba(74,184,232,0.12); color: var(--sky); }
+  .pill-coral { background: rgba(232,99,94,0.12); color: var(--coral); }
+
+  /* ─── GENE DETAIL ─── */
+  .detail-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 2rem;
+  }
+
+  .detail-back {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 7px 14px;
+    color: var(--text2);
+    font-family: var(--sans);
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 28px;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .detail-back:hover { color: var(--accent); border-color: var(--accent); }
+
+  .detail-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    margin-bottom: 32px;
+    align-items: start;
+  }
+
+  .detail-gene-id {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .detail-name {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .detail-species {
+    font-style: italic;
+    font-size: 16px;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+
+  .detail-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .detail-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+
+  .meta-item {}
+  .meta-key {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 4px;
+  }
+
+  .meta-val {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ─── SEQUENCE VIEWER ─── */
+  .seq-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .seq-header {
+    background: var(--surface);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .seq-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .seq-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .dot-mrna { background: var(--accent); }
+  .dot-cds { background: var(--sky); }
+  .dot-protein { background: var(--amber); }
+  .dot-genomic { background: var(--teal); }
+
+  .seq-copy {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    padding: 4px 10px;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+
+  .seq-copy:hover { color: var(--accent); border-color: var(--accent); }
+
+  .seq-body {
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.8;
+    color: var(--text2);
+    word-break: break-all;
+    white-space: pre-wrap;
+    max-height: 180px;
+    overflow-y: auto;
+    letter-spacing: 0.02em;
+  }
+
+  .seq-body.expanded { max-height: none; }
+
+  /* nucleotide coloring */
+  .nt-a { color: #5ee8a2; }
+  .nt-t { color: #f0a94a; }
+  .nt-g { color: #4ab8e8; }
+  .nt-c { color: #e8635e; }
+  .nt-u { color: #f0a94a; }
+
+  /* ─── TAXONOMY TREE ─── */
+  .taxonomy-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 2rem;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+  }
+
+  .tax-tree {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+  }
+
+  .tax-tree-head {
+    background: var(--surface);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  .tax-scroll { max-height: 600px; overflow-y: auto; padding: 8px 0; }
+
+  .tax-node {
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .tax-node:hover { background: var(--surface); color: var(--text); }
+  .tax-node.selected { background: rgba(61,218,138,0.08); color: var(--accent); }
+
+  .tax-indent { padding-left: 32px; }
+  .tax-indent2 { padding-left: 48px; }
+  .tax-indent3 { padding-left: 64px; }
+  .tax-indent4 { padding-left: 80px; }
+
+  .tax-toggle {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--text3);
+    flex-shrink: 0;
+  }
+
+  .tax-rank {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--text3);
+    background: var(--surface2);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .tax-detail {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 24px;
+  }
+
+  .tax-species-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .species-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .species-card:hover { border-color: var(--accent); background: var(--surface); }
+
+  .species-sci { font-style: italic; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .species-common { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+  .species-stats { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+  .species-stats span { color: var(--accent); }
+
+  /* ─── AI ANALYSIS PAGE ─── */
+  .ai-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 2rem;
+  }
+
+  .ai-header {
+    margin-bottom: 32px;
+  }
+
+  .ai-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .ai-subtitle {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .ai-tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .ai-tool-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text2);
+    font-family: var(--sans);
+  }
+
+  .ai-tool-btn:hover { border-color: var(--accent); background: var(--surface); color: var(--text); }
+  .ai-tool-btn.selected { border-color: var(--accent); background: rgba(61,218,138,0.08); color: var(--accent); }
+
+  .ai-tool-icon { font-size: 20px; margin-bottom: 8px; }
+  .ai-tool-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .ai-tool-desc { font-size: 11px; color: var(--text3); line-height: 1.4; }
+
+  .ai-input-area {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .ai-input-label {
+    background: var(--surface);
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ai-textarea {
+    width: 100%;
+    min-height: 120px;
+    background: transparent;
+    border: none;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    outline: none;
+    resize: vertical;
+  }
+
+  .ai-run-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: var(--r);
+    padding: 12px 28px;
+    color: var(--bg);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .ai-run-btn:hover { background: var(--accent3); }
+  .ai-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .ai-result {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+    margin-top: 20px;
+    display: none;
+  }
+
+  .ai-result.visible { display: block; }
+
+  .ai-result-head {
+    background: rgba(61,218,138,0.08);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ai-result-body {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--text2);
+    white-space: pre-wrap;
+  }
+
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 14px;
+    background: var(--accent);
+    margin-left: 2px;
+    animation: blink 1s infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ─── SPINNER ─── */
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(61,218,138,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  .spinner.active { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── PAGINATION ─── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding: 12px 0;
+  }
+
+  .page-info {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .page-btns { display: flex; gap: 6px; }
+
+  .page-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .page-btn:hover, .page-btn.active { background: rgba(61,218,138,0.1); color: var(--accent); border-color: var(--accent); }
+
+  /* ─── DOMAIN MAP ─── */
+  .domain-canvas {
+    width: 100%;
+    height: 80px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    margin-top: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ─── SCROLLBARS ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .taxonomy-wrap { grid-template-columns: 1fr; }
+    .detail-header { grid-template-columns: 1fr; }
+    nav { gap: 0.5rem; padding: 0 1rem; }
+    .nav-badge { display: none; }
+  }
+
+  /* ─── SEARCH HIGHLIGHT ─── */
+  .highlight { background: rgba(61,218,138,0.2); border-radius: 2px; padding: 0 1px; }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: var(--r);
+    padding: 10px 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="logo-icon">🍄</div>
+    FungiGeneDB
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('home')">Home</button>
+    <button class="nav-btn" onclick="showPage('browse')">Browse Genes</button>
+    <button class="nav-btn" onclick="showPage('taxonomy')">Taxonomy</button>
+    <button class="nav-btn" onclick="showPage('ai')">AI Analysis</button>
+    <button class="nav-btn" onclick="showPage('upload')">Upload Data</button>
+    <button class="nav-btn" onclick="showPage('login')" id="nav-login-btn">Login</button>
+    <button class="nav-btn" onclick="showPage('signup')" id="nav-signup-btn">Sign Up</button>
+    <button class="nav-btn" onclick="showPage('admin-login')" id="nav-admin-btn" style="color:var(--coral);">Admin Portal</button>
+  </div>
+  <div class="nav-badge">v2.1 · 2025</div>
+</nav>
+
+<!-- ══════════════════════════════════════════ HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero" style="max-width:1200px;padding:80px 2rem 40px;">
+    <div class="hero-eyebrow">Fungal Transcription Factor & Gene Database</div>
+    <h1>Explore <em>Fungal</em><br>Genomics at Scale</h1>
+    <p class="hero-sub">A comprehensive repository of transcription factors, mRNA sequences, gene annotations, and taxonomy for the Fungal Kingdom — engineered for mycologists and bioinformaticians.</p>
+    <div class="hero-search">
+      <input type="text" id="hero-search-input" placeholder="Search gene, species, TF family... e.g. AreA, Aspergillus, Zn2Cys6" onkeydown="if(event.key==='Enter')heroSearch()">
+      <button onclick="heroSearch()">Search →</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-num">48,312</div>
+        <div class="stat-label">TF Genes</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">1,847</div>
+        <div class="stat-label">Fungal Species</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">94</div>
+        <div class="stat-label">TF Families</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">312K</div>
+        <div class="stat-label">mRNA Sequences</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">6</div>
+        <div class="stat-label">Fungal Phyla</div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <div class="section-title">Transcription Factor Families</div>
+      <button class="see-all" onclick="showPage('browse')">Browse all families →</button>
+    </div>
+
+    <div class="tf-grid" id="tf-family-grid"></div>
+
+    <div class="section-head">
+      <div class="section-title">Recently Added Entries</div>
+      <button class="see-all" onclick="showPage('browse')">Full table →</button>
+    </div>
+    <div id="recent-genes"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ BROWSE PAGE -->
+<div class="page" id="page-browse">
+  <div class="browse-wrap">
+    <div style="margin-bottom:24px;">
+      <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-0.02em;">Gene Browser</div>
+      <div style="font-size:13px;color:var(--text3);">Browse and filter all fungal gene entries in the database</div>
+    </div>
+    <div class="browse-controls">
+      <input class="filter-input" type="text" id="browse-filter" placeholder="Search gene ID, name, species..." oninput="filterTable()">
+      <select class="filter-select" id="filter-family" onchange="filterTable()">
+        <option value="">All TF Families</option>
+      </select>
+      <select class="filter-select" id="filter-phylum" onchange="filterTable()">
+        <option value="">All Phyla</option>
+        <option value="Ascomycota">Ascomycota</option>
+        <option value="Basidiomycota">Basidiomycota</option>
+        <option value="Zygomycota">Zygomycota</option>
+        <option value="Chytridiomycota">Chytridiomycota</option>
+        <option value="Glomeromycota">Glomeromycota</option>
+        <option value="Mucoromycota">Mucoromycota</option>
+      </select>
+      <select class="filter-select" id="filter-type" onchange="filterTable()">
+        <option value="">All Gene Types</option>
+        <option value="TF">Transcription Factor</option>
+        <option value="mRNA">mRNA</option>
+        <option value="ncRNA">ncRNA</option>
+        <option value="Regulatory">Regulatory</option>
+      </select>
+    </div>
+    <table class="gene-table" id="gene-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable('id')">Gene ID ↕</th>
+          <th onclick="sortTable('name')">Gene Name ↕</th>
+          <th onclick="sortTable('species')">Species ↕</th>
+          <th onclick="sortTable('family')">TF Family ↕</th>
+          <th onclick="sortTable('phylum')">Phylum ↕</th>
+          <th onclick="sortTable('type')">Type ↕</th>
+          <th>Length (bp)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div class="pagination">
+      <div class="page-info" id="page-info">Showing 1–25 of 120</div>
+      <div class="page-btns" id="page-btns"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ GENE DETAIL PAGE -->
+<div class="page" id="page-detail">
+  <div class="detail-wrap">
+    <button class="detail-back" onclick="showPage('browse')">← Back to Browser</button>
+
+    <div class="detail-header">
+      <div>
+        <div class="detail-gene-id" id="d-gene-id"></div>
+        <div class="detail-name" id="d-gene-name"></div>
+        <div class="detail-species" id="d-species"></div>
+        <div class="detail-pills" id="d-pills"></div>
+      </div>
+      <button class="ai-run-btn" onclick="analyzeCurrentGene()" style="white-space:nowrap;">🤖 AI Analyze</button>
+    </div>
+
+    <div class="detail-meta" id="d-meta"></div>
+
+    <!-- Taxonomy breadcrumb -->
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;font-family:var(--mono);font-size:12px;color:var(--text3);">
+      <span style="color:var(--accent3);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:6px;">Taxonomy</span>
+      <div id="d-taxonomy" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;"></div>
+    </div>
+
+    <!-- Sequences -->
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;">Sequences</div>
+
+    <div class="seq-block" id="block-mrna">
+      <div class="seq-header">
+        <div class="seq-label"><div class="seq-dot dot-mrna"></div> mRNA Sequence (5'→3')</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text3);" id="mrna-len"></span>
+          <button class="seq-copy" onclick="copySeq('mrna-seq')">Copy</button>
+          <button class="seq-copy" onclick="toggleExpand('mrna-body')">Expand</button>
+        </div>
+      </div>
+      <div class="seq-body" id="mrna-body"></div>
+    </div>
+
+    <div class="seq-block" id="block-cds">
+      <div class="seq-header">
+        <div class="seq-label"><div class="seq-dot dot-cds"></div> Coding Sequence (CDS)</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text3);" id="cds-len"></span>
+          <button class="seq-copy" onclick="copySeq('cds-seq')">Copy</button>
+          <button class="seq-copy" onclick="toggleExpand('cds-body')">Expand</button>
+        </div>
+      </div>
+      <div class="seq-body" id="cds-body"></div>
+    </div>
+
+    <div class="seq-block" id="block-protein">
+      <div class="seq-header">
+        <div class="seq-label"><div class="seq-dot dot-protein"></div> Protein Sequence (AA)</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text3);" id="prot-len"></span>
+          <button class="seq-copy" onclick="copySeq('prot-seq')">Copy</button>
+          <button class="seq-copy" onclick="toggleExpand('prot-body')">Expand</button>
+        </div>
+      </div>
+      <div class="seq-body" id="prot-body"></div>
+    </div>
+
+    <!-- Domain map -->
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:20px;margin-bottom:20px;">
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;">Protein Domain Architecture</div>
+      <svg id="domain-svg" width="100%" height="70" viewBox="0 0 900 70" xmlns="http://www.w3.org/2000/svg" style="display:block;"></svg>
+    </div>
+
+    <!-- References -->
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:20px;">
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;">External References</div>
+      <div id="d-refs" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ TAXONOMY PAGE -->
+<div class="page" id="page-taxonomy">
+  <div class="taxonomy-wrap">
+    <!-- Tree -->
+    <div class="tax-tree">
+      <div class="tax-tree-head">Fungal Kingdom Tree</div>
+      <div class="tax-scroll" id="tax-tree-content"></div>
+    </div>
+    <!-- Detail panel -->
+    <div class="tax-detail">
+      <div id="tax-detail-content">
+        <div style="color:var(--text3);font-size:14px;padding:40px 0;text-align:center;">
+          Select a taxon from the tree to explore species and gene data
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ AI ANALYSIS PAGE -->
+<div class="page" id="page-ai">
+  <div class="ai-wrap">
+    <div class="ai-header">
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.15em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;">Powered by Gemini AI</div>
+      <div class="ai-title">AI Sequence Analysis</div>
+      <div class="ai-subtitle">Analyze fungal gene sequences, predict TF binding domains, interpret mRNA structures, and get biological insights powered by Gemini.</div>
+    </div>
+
+    <div class="ai-tools" id="ai-tool-btns"></div>
+
+    <div class="ai-input-area">
+      <div class="ai-input-label" id="ai-input-label">Paste sequence or gene ID</div>
+      <textarea class="ai-textarea" id="ai-input" placeholder="Paste a nucleotide sequence, protein sequence, gene ID, or ask a question about fungal genetics..."></textarea>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="ai-run-btn" id="ai-run" onclick="runAI()">
+        <span id="ai-btn-text">Run Analysis →</span>
+        <div class="spinner" id="ai-spinner"></div>
+      </button>
+      <button class="seq-copy" onclick="clearAI()" style="padding:10px 16px;">Clear</button>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text3);" id="ai-model-label">Gemini gemini-1.5-pro</span>
+    </div>
+
+    <div class="ai-result" id="ai-result">
+      <div class="ai-result-head">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#3dda8a" stroke-width="1.5"/><path d="M5 7l1.5 1.5L9 5" stroke="#3dda8a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        AI Analysis Result
+      </div>
+      <div class="ai-result-body" id="ai-result-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ UPLOAD PAGE -->
+<div class="page" id="page-upload">
+  <div class="ai-wrap">
+    <div class="ai-header">
+      <div class="ai-title">Upload Fungi Data</div>
+      <div class="ai-subtitle">Submit new sequences, gene annotations, or genome drafts to the FungiGeneDB database.</div>
+    </div>
+    <div class="ai-input-area" style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+      <input type="text" id="up-name" class="filter-input" placeholder="Gene Name (e.g., AreA)" style="width:100%;" />
+      <input type="text" id="up-species" class="filter-input" placeholder="Species (e.g., Aspergillus niger)" style="width:100%;" />
+      <textarea id="up-seq" class="ai-textarea" placeholder="Paste sequence..."></textarea>
+      <button class="ai-run-btn" onclick="submitUpload()" style="width:fit-content;">Submit Upload
+        <div class="spinner" id="up-spinner"></div>
+      </button>
+      <div id="up-msg" style="font-size:13px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ LOGIN PAGE -->
+<div class="page" id="page-login">
+  <div class="ai-wrap" style="max-width:340px;margin-top:80px;margin-left:auto;margin-right:auto;">
+    <div class="ai-header" style="text-align:center;margin-bottom:20px;">
+      <div class="ai-title" style="font-size:24px;">Sign In</div>
+      <div class="ai-subtitle" style="font-size:13px;margin-top:6px;">Access your FungiGeneDB account.</div>
+    </div>
+    <div class="ai-input-area" style="padding:28px 24px;display:flex;flex-direction:column;gap:14px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <div id="g_id_onload"
+         data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+         data-context="signin"
+         data-ux_mode="popup"
+         data-callback="handleGoogleCredentialResponse"
+         data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" style="display:flex; justify-content:center;"
+         data-type="standard"
+         data-shape="rectangular"
+         data-theme="outline"
+         data-text="signin_with"
+         data-size="large"
+         data-logo_alignment="left">
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--text3);margin:4px 0;">OR CONTINUE WITH EMAIL</div>
+      <input type="text" id="log-user" class="filter-input" placeholder="Username" style="width:100%;font-size:13px;padding:12px 14px;" />
+      <input type="password" id="log-pass" class="filter-input" placeholder="Password" style="width:100%;font-size:13px;padding:12px 14px;" />
+      <button class="ai-run-btn" onclick="submitLogin()" style="width:100%;justify-content:center;margin-top:4px;padding:13px;">Login
+        <div class="spinner" id="log-spinner"></div>
+      </button>
+      <div id="log-msg" style="font-size:13px;text-align:center;"></div>
+      <div style="text-align:center;font-size:12px;color:var(--text2);margin-top:12px;">
+        Don't have an account? <span style="color:var(--accent);cursor:pointer;font-weight:600;" onclick="showPage('signup')">Sign Up</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ SIGN UP PAGE -->
+<div class="page" id="page-signup">
+  <div class="ai-wrap" style="max-width:340px;margin-top:80px;margin-left:auto;margin-right:auto;">
+    <div class="ai-header" style="text-align:center;margin-bottom:20px;">
+      <div class="ai-title" style="font-size:24px;">Sign Up</div>
+      <div class="ai-subtitle" style="font-size:13px;margin-top:6px;">Create a new FungiGeneDB account.</div>
+    </div>
+    <div class="ai-input-area" style="padding:28px 24px;display:flex;flex-direction:column;gap:14px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <div class="g_id_signin" style="display:flex; justify-content:center;"
+         data-type="standard"
+         data-shape="rectangular"
+         data-theme="outline"
+         data-text="signup_with"
+         data-size="large"
+         data-logo_alignment="left">
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--text3);margin:4px 0;">OR REGISTER WITH EMAIL</div>
+      <input type="email" id="reg-email" class="filter-input" placeholder="Email Address" style="width:100%;font-size:13px;padding:12px 14px;" />
+      <input type="text" id="reg-user" class="filter-input" placeholder="Username" style="width:100%;font-size:13px;padding:12px 14px;" />
+      <input type="password" id="reg-pass" class="filter-input" placeholder="Password" style="width:100%;font-size:13px;padding:12px 14px;" />
+      <button class="ai-run-btn" onclick="submitSignup()" style="width:100%;justify-content:center;margin-top:4px;padding:13px;">Create Account
+        <div class="spinner" id="reg-spinner"></div>
+      </button>
+      <div id="reg-msg" style="font-size:13px;text-align:center;"></div>
+      <div style="text-align:center;font-size:12px;color:var(--text2);margin-top:12px;">
+        Already have an account? <span style="color:var(--accent);cursor:pointer;font-weight:600;" onclick="showPage('login')">Log In</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ ADMIN LOGIN PAGE -->
+<div class="page" id="page-admin-login">
+  <div class="ai-wrap" style="max-width:340px;margin-top:80px;margin-left:auto;margin-right:auto;">
+    <div class="ai-header" style="text-align:center;margin-bottom:20px;">
+      <div class="ai-title" style="font-size:24px;color:var(--coral);">Admin Portal</div>
+      <div class="ai-subtitle" style="font-size:13px;margin-top:6px;">Restricted Access Area</div>
+    </div>
+    <div class="ai-input-area" style="padding:28px 24px;display:flex;flex-direction:column;gap:14px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <input type="text" id="admin-user" class="filter-input" placeholder="Admin Username" style="width:100%;font-size:13px;padding:12px 14px;" />
+      <input type="password" id="admin-pass" class="filter-input" placeholder="Admin Password" style="width:100%;font-size:13px;padding:12px 14px;" />
+      <button class="ai-run-btn" onclick="submitAdminLogin()" style="width:100%;justify-content:center;margin-top:4px;padding:13px;background:var(--coral);">Authenticate
+        <div class="spinner" id="admin-spinner"></div>
+      </button>
+      <div id="admin-msg" style="font-size:13px;text-align:center;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ ADMIN DASHBOARD -->
+<div class="page" id="page-admin-dash">
+  <div style="max-width:1200px;margin:40px auto;padding:0 2rem;">
+    <div class="ai-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <div>
+        <div class="ai-title" style="font-size:28px;color:var(--coral);">Admin Dashboard</div>
+        <div class="ai-subtitle" style="font-size:14px;margin-top:6px;">Manage database records live.</div>
+      </div>
+      <button class="ai-run-btn" onclick="showAdminAddModal()">+ Add New Gene</button>
+    </div>
+    <div class="glass-panel" style="padding:0;overflow:auto;max-height:600px;">
+      <table class="data-table" id="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Species</th>
+            <th>Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('/api/genes');
+    if(res.ok) {
+       const { genes } = await res.json();
+       if(genes && genes.length > 0) {
+          GENE_DATA.length = 0;
+          GENE_DATA.push(...genes);
+          filteredGenes = [...GENE_DATA];
+          renderTable();
+       }
+    }
+  } catch(e) {}
+});
+// ══════════════════════════════════════════════════
+//  DATABASE
+// ══════════════════════════════════════════════════
+
+const TF_FAMILIES = [
+  { id:'Zn2Cys6', name:'Zn(II)₂Cys₆', tag:'tag-zinc', desc:'Binuclear zinc cluster; largest fungal-specific TF family controlling metabolism and stress response.', count:8420, category:'Zinc Finger' },
+  { id:'C2H2', name:'C2H2 Zinc Finger', tag:'tag-zinc', desc:'Classical zinc finger domain; regulates development, pathogenicity, and secondary metabolism.', count:6230, category:'Zinc Finger' },
+  { id:'bZIP', name:'bZIP', tag:'tag-basic', desc:'Basic leucine zipper domain; critical in stress response, carbon/nitrogen sensing, and sexual development.', count:4180, category:'Basic' },
+  { id:'Homeobox', name:'Homeobox', tag:'tag-hth', desc:'HTH domain family; controls mating type, morphogenesis, and hyphal growth in dimorphic fungi.', count:3720, category:'HTH' },
+  { id:'GATA', name:'GATA Factor', tag:'tag-basic', desc:'Zinc finger binds GATA motifs; primary nitrogen catabolite repression regulator (NIT2, AreA).', count:2940, category:'Basic' },
+  { id:'Velvet', name:'Velvet Domain', tag:'tag-other', desc:'Fungal-specific light-responsive TF; controls secondary metabolism and sexual sporulation.', count:480, category:'Fungal-specific' },
+  { id:'WD40', name:'WD40 Repeat', tag:'tag-wd', desc:'Beta-propeller scaffold; scaffolds chromatin-modifying complexes and signal transduction.', count:5100, category:'Repeat' },
+  { id:'HSF', name:'Heat Shock Factor', tag:'tag-hth', desc:'Trimeric HTH-type TF; activates chaperone genes in thermal and oxidative stress.', count:1200, category:'HTH' },
+  { id:'Forkhead', name:'Forkhead (FOX)', tag:'tag-hth', desc:'Winged-helix domain; regulates cell cycle, stress tolerance, and secondary metabolism.', count:1860, category:'HTH' },
+  { id:'MYB', name:'MYB/SANT', tag:'tag-basic', desc:'HTH-type regulator with R2 and R3 repeats; transcription of flocculation and biofilm genes.', count:2340, category:'Basic' },
+  { id:'Ets', name:'Ets Domain', tag:'tag-other', desc:'Purine-rich sequence binding; involved in MAP kinase pathways and cell wall synthesis.', count:980, category:'Other' },
+  { id:'MADS', name:'MADS-box', tag:'tag-basic', desc:'MEF2-like domain; controls meiosis, sporulation, and carbon catabolite repression.', count:720, category:'Basic' },
+];
+
+const SEQUENCES = {
+  areA: {
+    mrna: 'AUGGCUAAGCUUAUCGAAGGUCUGGUGGUCGUGGUGAAGGAGCUCAAGCUGCAGCGGCGACAGCUGGCGGAGAGCGAGCUGCAGCAGCUGGUGAGCUACGAGCUGCAGAAGAAGGAGCUGCAGCAGCUGGUCAAGCAGCUGCUGGACGAGCUGCAGCUGGAGCAGCUGAAGCAGCGGCUGGAGCAGCUGCAGGAGCAGCUGCAGCUGGAGCAGCUGAAGAAGCGACUGCAGCUGCAGCAGCUGCUGGAGCAGCUGCAGCUGCAGAAGCAGCUGAAGCAGGCGCUGCAGCAGCUGCAGAAGCAGCUGCAGCAGCAGCUGCAGCAGAAGCUGCAGCAGCUGCAGAAGCAGCUGCAGCAGCAGCUGCAGCAG',
+    cds:  'ATGGCTAAGCTTATCGAAGGTCTGGTGGTCGTGGTGAAGGAGCTCAAGCTGCAGCGGCGACAGCTGGCGGAGAGCGAGCTGCAGCAGCTGGTGAGCTACGAGCTGCAGAAGAAGGAGCTGCAGCAGCTGGTCAAGCAGCTGCTGGACGAGCTGCAGCTGGAGCAGCTGAAGCAGCGGCTGGAGCAGCTGCAGGAGCAGCTGCAGCTGGAGCAGCTGAAGAAGCGACTGCAGCTGCAGCAGCTGCTGGAGCAGCTGCAGCTGCAGAAGCAGCTGAAGCAGGCGCTGCAGCAGCTGCAGAAGCAGCTGCAGCAGCAGCTGCAGCAGAAGCTGCAGCAGCTGCAGAAGCAGCTGCAGCAGCAGCTGCAGCAGTAA',
+    protein:'MAKLIEGLLVVVKELKLQRRQLAESELLQLVSYELQKKELQQLLKQLLDEL QLEQLKQRLEQLQEQLQLEQLKRRLQLQQLLEQLQLQKQLKQALQQLQKQLQQQLQQKLQQKLQKLQQQLQQ*',
+    domains:[
+      { name:'GATA Zinc Finger', start:120, end:260, color:'#4ab8e8' },
+      { name:'Activation Domain', start:280, end:370, color:'#3dda8a' },
+      { name:'Nuclear Localisation', start:380, end:420, color:'#f0a94a' },
+    ]
+  },
+  crz1: {
+    mrna: 'AUGGCGAGCUCGUCAAAGAACAAGAAAUUCCUGAGCUCGGACGACGAGCCGCAGUACGAGCCGCAGCAGCAGGAGCCGCAGCAGCAGCCCCCGCAGCAGCCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAACAGCAGCAGCAGCAGCAGCCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG',
+    cds: 'ATGGCGAGCTCGTCAAAGAACAAGAAATTCCTGAGCTCGGACGACGAGCCGCAGTACGAGCCGCAGCAGCAGGAGCCGCAGCAGCAGCCCCCGCAGCAGCCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAACAGCAGCAGCAGCAGCAGCCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGTAA',
+    protein:'MASSPKNKKFLSSDDEEPQYEPQQEPQQPPPQQPQQQQQQQQQQQQQPQQQQQQPQQQQQQQQQQQQQQQQQQQQQQ*',
+    domains:[
+      { name:'Regulatory N-term', start:0, end:80, color:'#e8635e' },
+      { name:'C2H2 Zinc Finger ×3', start:90, end:220, color:'#4ab8e8' },
+      { name:'Calcineurin-binding', start:230, end:310, color:'#1be8c8' },
+    ]
+  }
+};
+
+const GENE_DATA = [
+  { id:'FGD0001', name:'AreA', species:'Aspergillus niger', phylum:'Ascomycota', class:'Eurotiomycetes', order:'Eurotiales', family:'Aspergillaceae', genus:'Aspergillus', type:'TF', tfFamily:'GATA', function:'Nitrogen catabolite repression', chr:'Chr1', strand:'+', start:1024500, end:1027300, length:2800, introns:3, mrnaLen:1840, cdsLen:1620, protein:540, gc:52.3, seqKey:'areA', accession:'XM_001393476', refs:{ncbi:'XM_001393476',uniprot:'Q5B7I7',fungidb:'Afu1g00090'} },
+  { id:'FGD0002', name:'NIT2', species:'Neurospora crassa', phylum:'Ascomycota', class:'Sordariomycetes', order:'Sordariales', family:'Sordariaceae', genus:'Neurospora', type:'TF', tfFamily:'GATA', function:'Nitrogen metabolism', chr:'LG1', strand:'+', start:4521000, end:4524200, length:3200, introns:4, mrnaLen:1920, cdsLen:1680, protein:560, gc:53.1, seqKey:'areA', accession:'XM_956726', refs:{ncbi:'XM_956726',uniprot:'Q9Y7L3',fungidb:'NCU01224'} },
+  { id:'FGD0003', name:'Crz1', species:'Saccharomyces cerevisiae', phylum:'Ascomycota', class:'Saccharomycetes', order:'Saccharomycetales', family:'Saccharomycetaceae', genus:'Saccharomyces', type:'TF', tfFamily:'C2H2', function:'Calcineurin-dependent stress response', chr:'ChrIV', strand:'-', start:815200, end:818100, length:2900, introns:0, mrnaLen:2150, cdsLen:1920, protein:640, gc:38.7, seqKey:'crz1', accession:'NM_001181793', refs:{ncbi:'NM_001181793',uniprot:'P53968',fungidb:'YNL027W'} },
+  { id:'FGD0004', name:'VeA', species:'Aspergillus fumigatus', phylum:'Ascomycota', class:'Eurotiomycetes', order:'Eurotiales', family:'Aspergillaceae', genus:'Aspergillus', type:'TF', tfFamily:'Velvet', function:'Light-regulated secondary metabolism', chr:'Chr1', strand:'+', start:2301400, end:2304600, length:3200, introns:2, mrnaLen:2080, cdsLen:1860, protein:620, gc:50.8, seqKey:'areA', accession:'XM_747978', refs:{ncbi:'XM_747978',uniprot:'Q4WAA9',fungidb:'Afu1g12700'} },
+  { id:'FGD0005', name:'Hap2', species:'Candida albicans', phylum:'Ascomycota', class:'Saccharomycetes', order:'Saccharomycetales', family:'Saccharomycetaceae', genus:'Candida', type:'TF', tfFamily:'Homeobox', function:'Mating type switching', chr:'Chr2', strand:'+', start:1400200, end:1402800, length:2600, introns:1, mrnaLen:1780, cdsLen:1560, protein:520, gc:36.4, seqKey:'crz1', accession:'XM_716279', refs:{ncbi:'XM_716279',uniprot:'Q59RQ4',fungidb:'orf19.3903'} },
+  { id:'FGD0006', name:'Rim101', species:'Cryptococcus neoformans', phylum:'Basidiomycota', class:'Tremellomycetes', order:'Tremellales', family:'Cryptococcaceae', genus:'Cryptococcus', type:'TF', tfFamily:'Zn2Cys6', function:'pH-responsive gene expression', chr:'ChrIV', strand:'-', start:672100, end:674500, length:2400, introns:5, mrnaLen:1640, cdsLen:1440, protein:480, gc:60.2, seqKey:'areA', accession:'XM_012196548', refs:{ncbi:'XM_012196548',uniprot:'Q5KI07',fungidb:'CNAG_01586'} },
+  { id:'FGD0007', name:'Brlz1', species:'Ustilago maydis', phylum:'Basidiomycota', class:'Ustilaginomycetes', order:'Ustilaginales', family:'Ustilaginaceae', genus:'Ustilago', type:'TF', tfFamily:'bZIP', function:'Fungal pathogenicity regulation', chr:'Chr21', strand:'+', start:384000, end:386200, length:2200, introns:3, mrnaLen:1540, cdsLen:1320, protein:440, gc:58.9, seqKey:'crz1', accession:'XM_011391258', refs:{ncbi:'XM_011391258',uniprot:'A0A0D1DS14',fungidb:'UMAG_01829'} },
+  { id:'FGD0008', name:'Ace1', species:'Trichoderma reesei', phylum:'Ascomycota', class:'Sordariomycetes', order:'Hypocreales', family:'Hypocreaceae', genus:'Trichoderma', type:'TF', tfFamily:'C2H2', function:'Cellulase gene repression', chr:'ScfChr1', strand:'-', start:942300, end:944100, length:1800, introns:2, mrnaLen:1340, cdsLen:1200, protein:400, gc:54.7, seqKey:'crz1', accession:'XM_006962382', refs:{ncbi:'XM_006962382',uniprot:'Q7Z997',fungidb:'Trire2_2904'} },
+  { id:'FGD0009', name:'Hac1', species:'Neurospora crassa', phylum:'Ascomycota', class:'Sordariomycetes', order:'Sordariales', family:'Sordariaceae', genus:'Neurospora', type:'TF', tfFamily:'bZIP', function:'Unfolded protein response', chr:'LG3', strand:'+', start:5820100, end:5822900, length:2800, introns:2, mrnaLen:1900, cdsLen:1680, protein:560, gc:51.8, seqKey:'areA', accession:'XM_963448', refs:{ncbi:'XM_963448',uniprot:'Q7SA23',fungidb:'NCU03169'} },
+  { id:'FGD0010', name:'MsnA', species:'Aspergillus nidulans', phylum:'Ascomycota', class:'Eurotiomycetes', order:'Eurotiales', family:'Aspergillaceae', genus:'Aspergillus', type:'TF', tfFamily:'C2H2', function:'General stress response', chr:'Chr3', strand:'+', start:3105000, end:3107300, length:2300, introns:3, mrnaLen:1680, cdsLen:1500, protein:500, gc:51.2, seqKey:'crz1', accession:'XM_659081', refs:{ncbi:'XM_659081',uniprot:'Q5B3L6',fungidb:'AN5720'} },
+  { id:'FGD0011', name:'Wor1', species:'Candida albicans', phylum:'Ascomycota', class:'Saccharomycetes', order:'Saccharomycetales', family:'Saccharomycetaceae', genus:'Candida', type:'TF', tfFamily:'WD40', function:'White-opaque phenotypic switching', chr:'Chr5', strand:'+', start:2118300, end:2120800, length:2500, introns:0, mrnaLen:2120, cdsLen:1920, protein:640, gc:37.1, seqKey:'areA', accession:'XM_720699', refs:{ncbi:'XM_720699',uniprot:'Q5ARZ6',fungidb:'orf19.5992'} },
+  { id:'FGD0012', name:'StuA', species:'Aspergillus fumigatus', phylum:'Ascomycota', class:'Eurotiomycetes', order:'Eurotiales', family:'Aspergillaceae', genus:'Aspergillus', type:'TF', tfFamily:'Homeobox', function:'Conidiophore development', chr:'Chr2', strand:'-', start:1688000, end:1691000, length:3000, introns:4, mrnaLen:2100, cdsLen:1860, protein:620, gc:49.6, seqKey:'crz1', accession:'XM_749208', refs:{ncbi:'XM_749208',uniprot:'Q4X0G3',fungidb:'Afu2g11120'} },
+  { id:'FGD0013', name:'PacC', species:'Aspergillus niger', phylum:'Ascomycota', class:'Eurotiomycetes', order:'Eurotiales', family:'Aspergillaceae', genus:'Aspergillus', type:'TF', tfFamily:'C2H2', function:'Ambient pH response', chr:'Chr6', strand:'+', start:876000, end:878500, length:2500, introns:3, mrnaLen:1740, cdsLen:1560, protein:520, gc:52.6, seqKey:'areA', accession:'XM_001396312', refs:{ncbi:'XM_001396312',uniprot:'Q5B2W9',fungidb:'An14g06220'} },
+  { id:'FGD0014', name:'Ste12', species:'Saccharomyces cerevisiae', phylum:'Ascomycota', class:'Saccharomycetes', order:'Saccharomycetales', family:'Saccharomycetaceae', genus:'Saccharomyces', type:'TF', tfFamily:'Homeobox', function:'Mating pheromone pathway', chr:'ChrXI', strand:'+', start:641100, end:643900, length:2800, introns:0, mrnaLen:2400, cdsLen:2160, protein:720, gc:39.8, seqKey:'crz1', accession:'NM_001182063', refs:{ncbi:'NM_001182063',uniprot:'P13574',fungidb:'YHR084W'} },
+  { id:'FGD0015', name:'MetR', species:'Botrytis cinerea', phylum:'Ascomycota', class:'Leotiomycetes', order:'Erysiphales', family:'Sclerotiniaceae', genus:'Botrytis', type:'TF', tfFamily:'Zn2Cys6', function:'Sulfur amino acid metabolism', chr:'ChrIX', strand:'-', start:1341200, end:1343400, length:2200, introns:4, mrnaLen:1560, cdsLen:1380, protein:460, gc:47.3, seqKey:'areA', accession:'XM_001556832', refs:{ncbi:'XM_001556832',uniprot:'A7EFT6',fungidb:'BC1G_16199'} },
+];
+
+const TAXONOMY_TREE = [
+  { id:'fungi', name:'Kingdom Fungi', rank:'Kingdom', expanded:true, children:[
+    { id:'ascomycota', name:'Ascomycota', rank:'Phylum', expanded:false, children:[
+      { id:'eurotiomycetes', name:'Eurotiomycetes', rank:'Class', children:[
+        { id:'eurotiales', name:'Eurotiales', rank:'Order', children:[
+          { id:'aspergillaceae', name:'Aspergillaceae', rank:'Family', leaf:true }
+        ]}
+      ]},
+      { id:'saccharomycetes', name:'Saccharomycetes', rank:'Class', children:[
+        { id:'saccharomycetales', name:'Saccharomycetales', rank:'Order', children:[
+          { id:'saccharomycetaceae', name:'Saccharomycetaceae', rank:'Family', leaf:true }
+        ]}
+      ]},
+      { id:'sordariomycetes', name:'Sordariomycetes', rank:'Class', children:[
+        { id:'sordariales', name:'Sordariales', rank:'Order', children:[
+          { id:'sordariaceae', name:'Sordariaceae', rank:'Family', leaf:true }
+        ]},
+        { id:'hypocreales', name:'Hypocreales', rank:'Order', children:[
+          { id:'hypocreaceae', name:'Hypocreaceae', rank:'Family', leaf:true }
+        ]}
+      ]}
+    ]},
+    { id:'basidiomycota', name:'Basidiomycota', rank:'Phylum', expanded:false, children:[
+      { id:'tremellomycetes', name:'Tremellomycetes', rank:'Class', children:[
+        { id:'tremellales', name:'Tremellales', rank:'Order', children:[
+          { id:'cryptococcaceae', name:'Cryptococcaceae', rank:'Family', leaf:true }
+        ]}
+      ]},
+      { id:'ustilaginomycetes', name:'Ustilaginomycetes', rank:'Class', children:[
+        { id:'ustilaginales', name:'Ustilaginales', rank:'Order', children:[
+          { id:'ustilaginaceae', name:'Ustilaginaceae', rank:'Family', leaf:true }
+        ]}
+      ]}
+    ]},
+    { id:'mucoromycota', name:'Mucoromycota', rank:'Phylum', expanded:false, children:[
+      { id:'mucoromycetes', name:'Mucoromycetes', rank:'Class', children:[
+        { id:'mucorales', name:'Mucorales', rank:'Order', children:[
+          { id:'mucoraceae', name:'Mucoraceae', rank:'Family', leaf:true }
+        ]}
+      ]}
+    ]},
+    { id:'chytridiomycota', name:'Chytridiomycota', rank:'Phylum', expanded:false, children:[] },
+    { id:'glomeromycota', name:'Glomeromycota', rank:'Phylum', expanded:false, children:[] }
+  ]}
+];
+
+const SPECIES_MAP = {
+  aspergillaceae: [
+    { sci:'Aspergillus niger', common:'Black mold', genes:3240, tfs:218 },
+    { sci:'Aspergillus fumigatus', common:'Gray mold (opportunistic pathogen)', genes:4980, tfs:241 },
+    { sci:'Aspergillus nidulans', common:'Model organism', genes:4510, tfs:228 },
+    { sci:'Aspergillus flavus', common:'Aflatoxin producer', genes:3880, tfs:196 },
+    { sci:'Penicillium chrysogenum', common:'Penicillin producer', genes:4120, tfs:210 },
+  ],
+  saccharomycetaceae: [
+    { sci:'Saccharomyces cerevisiae', common:"Baker's yeast (model)", genes:5880, tfs:312 },
+    { sci:'Candida albicans', common:'Human pathogen', genes:5980, tfs:298 },
+    { sci:'Kluyveromyces lactis', common:'Dairy yeast', genes:4220, tfs:188 },
+    { sci:'Yarrowia lipolytica', common:'Oleaginous yeast', genes:6730, tfs:241 },
+  ],
+  sordariaceae: [
+    { sci:'Neurospora crassa', common:'Red bread mold (model)', genes:9730, tfs:290 },
+    { sci:'Podospora anserina', common:'Senescence model', genes:10310, tfs:264 },
+  ],
+  hypocreaceae: [
+    { sci:'Trichoderma reesei', common:'Cellulase producer', genes:9140, tfs:272 },
+    { sci:'Trichoderma atroviride', common:'Biocontrol agent', genes:10070, tfs:280 },
+    { sci:'Fusarium oxysporum', common:'Vascular wilt pathogen', genes:11770, tfs:358 },
+  ],
+  cryptococcaceae: [
+    { sci:'Cryptococcus neoformans', common:'Meningitis pathogen', genes:6970, tfs:247 },
+    { sci:'Cryptococcus gattii', common:'Primary pathogen', genes:6630, tfs:232 },
+  ],
+  ustilaginaceae: [
+    { sci:'Ustilago maydis', common:'Corn smut (model)', genes:6700, tfs:224 },
+  ],
+  mucoraceae: [
+    { sci:'Mucor circinelloides', common:'Mucormycosis pathogen', genes:11840, tfs:304 },
+    { sci:'Rhizopus microsporus', common:'Food fermenter', genes:11230, tfs:288 },
+  ],
+};
+
+const AI_TOOLS = [
+  { id:'sequence', icon:'🧬', name:'Sequence Analysis', desc:'Annotate TF domains, GC content, codon usage', prompt:'Analyze this fungal DNA/mRNA sequence for transcription factor domains, structural features, GC content, and biological significance. Identify any known fungal TF binding motifs.' },
+  { id:'protein', icon:'🔬', name:'Protein Function', desc:'Predict protein function & binding sites', prompt:'Analyze this fungal protein sequence. Identify domains, predict biological function, secondary structure elements, and any known fungal regulatory roles.' },
+  { id:'taxonomy', icon:'🌿', name:'Taxonomy & Phylogeny', desc:'Classify fungal species from ITS/LSU', prompt:'Given this sequence or gene information, provide a taxonomic classification in the fungal kingdom context, discuss phylogenetic placement, and compare to closely related fungal taxa.' },
+  { id:'mrna', icon:'📡', name:'mRNA Structure', desc:'5′UTR, 3′UTR, ORF & splicing analysis', prompt:'Analyze this fungal mRNA sequence: identify the 5\'UTR, coding sequence (ORF), 3\'UTR, predicted splice sites, polyadenylation signals, and any regulatory elements that might affect expression.' },
+  { id:'compare', icon:'⚖️', name:'Comparative Genomics', desc:'Cross-species gene conservation', prompt:'Compare this fungal gene with known homologs. Discuss conservation across fungal phyla, synteny, functional divergence, and any relevant evolutionary insights from a mycological perspective.' },
+  { id:'custom', icon:'💬', name:'Free Query', desc:'Ask anything about fungal genetics', prompt:'' },
+];
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let currentPage = 'home';
+let currentGene = null;
+let filteredGenes = [...GENE_DATA];
+let currentPageNum = 1;
+const PAGE_SIZE = 8;
+let sortKey = 'id';
+let sortDir = 1;
+let selectedAITool = 'sequence';
+let expandedTaxNodes = new Set(['fungi','ascomycota']);
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  btns.forEach(b => { if(b.textContent.toLowerCase().includes(name.split('-')[0])) b.classList.add('active'); });
+  currentPage = name;
+  if(name==='taxonomy') renderTaxTree();
+}
+
+// ══════════════════════════════════════════════════
+//  HOME PAGE
+// ══════════════════════════════════════════════════
+function renderHome() {
+  // TF Family cards
+  const grid = document.getElementById('tf-family-grid');
+  grid.innerHTML = TF_FAMILIES.map(f => `
+    <div class="tf-card" onclick="filterByFamily('${f.id}')">
+      <div class="tf-tag ${f.tag}">${f.category}</div>
+      <div class="tf-name">${f.name}</div>
+      <div class="tf-desc">${f.desc}</div>
+      <div class="tf-count">Entries: <span>${f.count.toLocaleString()}</span></div>
+    </div>`).join('');
+
+  // Recent genes (first 5)
+  const recent = document.getElementById('recent-genes');
+  recent.innerHTML = `<table class="gene-table">
+    <thead><tr><th>Gene ID</th><th>Name</th><th>Species</th><th>TF Family</th><th>Function</th></tr></thead>
+    <tbody>${GENE_DATA.slice(0,5).map(g=>`
+      <tr onclick="viewGene('${g.id}')">
+        <td><span class="gene-id">${g.id}</span></td>
+        <td><strong>${g.name}</strong></td>
+        <td class="species-name">${g.species}</td>
+        <td><span class="pill pill-teal">${g.tfFamily}</span></td>
+        <td style="font-size:12px;color:var(--text3);">${g.function}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+
+  // Populate filter select
+  const sel = document.getElementById('filter-family');
+  TF_FAMILIES.forEach(f => {
+    const o = document.createElement('option');
+    o.value = f.id; o.textContent = f.name;
+    sel.appendChild(o);
+  });
+}
+
+function heroSearch() {
+  const q = document.getElementById('hero-search-input').value;
+  document.getElementById('browse-filter').value = q;
+  filterTable();
+  showPage('browse');
+}
+
+function filterByFamily(fid) {
+  document.getElementById('filter-family').value = fid;
+  filterTable();
+  showPage('browse');
+}
+
+// ══════════════════════════════════════════════════
+//  BROWSE / TABLE
+// ══════════════════════════════════════════════════
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  if(!tbody) return;
+  const start = (currentPageNum - 1) * PAGE_SIZE;
+  const slice = filteredGenes.slice(start, start + PAGE_SIZE);
+
+  tbody.innerHTML = slice.map(g => `
+    <tr onclick="viewGene('${g.id}')">
+      <td><span class="gene-id">${g.id}</span></td>
+      <td><strong style="font-size:14px;">${g.name}</strong></td>
+      <td class="species-name" style="font-size:13px;">${g.species}</td>
+      <td><span class="pill pill-teal">${g.tfFamily}</span></td>
+      <td style="font-size:12px;color:var(--text2);">${g.function}</td>
+      <td><span class="pill pill-sky">${g.type}</span></td>
+      <td style="font-family:var(--mono);font-size:12px;">${g.length ? g.length.toLocaleString() : '-'}</td>
+      <td><button class="seq-copy" onclick="event.stopPropagation();viewGene('${g.id}')">View →</button></td>
+    </tr>`).join('');
+
+  document.getElementById('page-info').textContent =
+    `Showing ${start+1}–${Math.min(start+PAGE_SIZE, filteredGenes.length)} of ${filteredGenes.length}`;
+
+  renderPagination();
+}
+
+function pillClass(family) {
+  const map = { GATA:'pill-green', C2H2:'pill-sky', bZIP:'pill-teal', Velvet:'pill-amber',
+    Homeobox:'pill-coral', WD40:'pill-teal', HSF:'pill-amber', Zn2Cys6:'pill-sky',
+    Forkhead:'pill-green', MYB:'pill-coral', MADS:'pill-teal', Ets:'pill-amber' };
+  return map[family] || 'pill-green';
+}
+
+function filterTable() {
+  const q = document.getElementById('browse-filter').value.trim().toLowerCase();
+  
+  // if no query or it's "fungi" showing everything:
+  if(!q || q === 'fungi') {
+    filteredGenes = [...GENE_DATA];
+  } else {
+    filteredGenes = GENE_DATA.filter(g => 
+       (g.name && g.name.toLowerCase().includes(q)) || 
+       (g.species && g.species.toLowerCase().includes(q)) ||
+       (g.tfFamily && g.tfFamily.toLowerCase().includes(q)) ||
+       (g.id && g.id.toLowerCase().includes(q))
+    );
+  }
+  currentPageNum = 1;
+  renderTable();
+}
+
+
+function sortTable(key) {
+  if(sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = 1; }
+  filterTable();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filteredGenes.length / PAGE_SIZE);
+  const btns = document.getElementById('page-btns');
+  btns.innerHTML = '';
+  for(let i=1;i<=total;i++) {
+    const b = document.createElement('button');
+    b.className = 'page-btn' + (i===currentPageNum?' active':'');
+    b.textContent = i;
+    b.onclick = () => { currentPageNum = i; renderTable(); };
+    btns.appendChild(b);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  GENE DETAIL
+// ══════════════════════════════════════════════════
+function viewGene(id) {
+  showPage('detail');
+  document.getElementById('d-gene-name').textContent = 'Loading...';
+
+  const g = GENE_DATA.find(x => x.id === id);
+  if(!g) {
+    document.getElementById('d-gene-name').textContent = 'Gene Not Found';
+    return;
+  }
+  currentGene = g;
+
+  document.getElementById('d-gene-id').textContent = g.id + ' · ' + (g.accession || 'N/A');
+  document.getElementById('d-gene-name').textContent = g.name;
+  document.getElementById('d-species').textContent = g.species || '-';
+  document.getElementById('d-pills').innerHTML = `<span class="pill pill-sky">${g.type || 'TF'}</span><span class="pill ${pillClass(g.tfFamily)}">${g.tfFamily || 'Unknown'}</span>`;
+
+  document.getElementById('d-meta').innerHTML = [
+    { k:'Length', v: (g.length || '-') + ' bp' },
+    { k:'Chr/Strand', v: (g.chr||'-') + ' (' + (g.strand||'') + ')' },
+    { k:'Coordinates', v: (g.start ? g.start.toLocaleString() : '-') + '–' + (g.end ? g.end.toLocaleString() : '-') },
+    { k:'GC Content', v: (g.gc || '-') + '%' },
+    { k:'Locus', v: (g.refs && g.refs.fungidb ? g.refs.fungidb : '-') }
+  ].map(m=>`<div class="meta-item"><div class="meta-key">${m.k}</div><div class="meta-val">${m.v}</div></div>`).join('');
+
+  document.getElementById('d-taxonomy').innerHTML = [g.phylum, g.class, g.order, g.family, g.genus].filter(Boolean).join(' → ');
+
+  document.getElementById('block-mrna').style.display = 'block';
+  document.getElementById('block-cds').style.display = 'block';
+
+  // Sequences
+  const seqData = g.seqKey && typeof SEQUENCES !== 'undefined' ? SEQUENCES[g.seqKey] : null;
+  document.getElementById('cds-seq').textContent = seqData && seqData.cds ? seqData.cds : 'Sequence data not locally cached.';
+  document.getElementById('prot-seq').textContent = seqData && seqData.protein ? seqData.protein : 'Sequence data not locally cached.';
+  
+  if (seqData && seqData.cds) {
+     document.getElementById('cds-len').textContent = seqData.cds.length + ' nt';
+  }
+  if (seqData && seqData.protein) {
+     document.getElementById('prot-len').textContent = seqData.protein.length + ' aa';
+  }
+
+  // Domain UI
+  const domSvg = document.getElementById('domain-svg');
+  if(domSvg) {
+      domSvg.innerHTML = `<rect x="50" y="25" width="800" height="20" rx="10" fill="var(--bg2)"/>
+           <rect x="200" y="15" width="100" height="40" rx="4" fill="#4ab8e8"/>
+           <text x="250" y="40" fill="#0b0e14" font-size="10" font-weight="bold" text-anchor="middle" font-family="var(--mono)">${g.tfFamily}</text>`;
+  }
+
+  const refsDiv = document.getElementById('d-refs');
+  if (refsDiv) {
+    refsDiv.innerHTML = '';
+    if(g.refs && Object.keys(g.refs).length > 0) {
+        for(const [src, param] of Object.entries(g.refs)) {
+            let url = '#';
+            if(src === 'ncbi') url = 'https://www.ncbi.nlm.nih.gov/nuccore/' + param;
+            if(src === 'uniprot') url = 'https://www.uniprot.org/uniprotkb/' + param;
+            if(src === 'fungidb') url = 'https://fungidb.org/fungidb/app/record/gene/' + param;
+            refsDiv.innerHTML += `<a href="${url}" target="_blank" style="text-decoration:none;"><span class="pill pill-teal" style="cursor:pointer;">${src.toUpperCase()}: ${param}</span></a>&nbsp;`;
+        }
+    } else {
+        refsDiv.innerHTML = '<span style="color:var(--text3);font-size:12px;">No external references.</span>';
+    }
+  }
+}
+
+function renderDomainsAPI(domains, totalLen) {
+  const svg = document.getElementById('domain-svg');
+  if(!totalLen) totalLen = 500;
+  const W = 900;
+  const backbone = `<rect x="20" y="30" width="${W-40}" height="10" rx="5" fill="#1a2e22" stroke="#3dda8a22" stroke-width="1"/>
+    <text x="22" y="62" fill="#567868" font-size="10" font-family="monospace">1</text>
+    <text x="${W-60}" y="62" fill="#567868" font-size="10" font-family="monospace">${totalLen}aa</text>`;
+  const rects = domains.map(d => {
+    let x = 20 + (d.start / totalLen) * (W - 40);
+    let w = ((d.end - d.start) / totalLen) * (W - 40);
+    if(w < 2) w = 2; // min width
+    return `<rect x="${x.toFixed(1)}" y="24" width="${w.toFixed(1)}" height="22" rx="4" fill="${d.color}" opacity="0.85"/>
+      <text x="${(x + w/2).toFixed(1)}" y="37" text-anchor="middle" fill="#070d0b" font-size="9.5" font-family="monospace" font-weight="700">${d.name.substring(0, 10)}</text>`;
+  }).join('');
+  svg.innerHTML = backbone + rects;
+}
+
+
+function colorNucleotides(seq) {
+  return seq.replace(/[AaTtGgCcUu]/g, c => {
+    const l = c.toUpperCase();
+    if(l==='A') return `<span class="nt-a">${c}</span>`;
+    if(l==='T') return `<span class="nt-t">${c}</span>`;
+    if(l==='G') return `<span class="nt-g">${c}</span>`;
+    if(l==='C') return `<span class="nt-c">${c}</span>`;
+    if(l==='U') return `<span class="nt-u">${c}</span>`;
+    return c;
+  });
+}
+
+function renderDomains(domains) {
+  const svg = document.getElementById('domain-svg');
+  const W = 900, total = 480;
+  const backbone = `<rect x="20" y="30" width="${W-40}" height="10" rx="5" fill="#1a2e22" stroke="#3dda8a22" stroke-width="1"/>
+    <text x="22" y="62" fill="#567868" font-size="10" font-family="monospace">1</text>
+    <text x="${W-60}" y="62" fill="#567868" font-size="10" font-family="monospace">${total}aa</text>`;
+  const rects = domains.map(d => {
+    const x = 20 + (d.start / total) * (W - 40);
+    const w = ((d.end - d.start) / total) * (W - 40);
+    return `<rect x="${x.toFixed(1)}" y="24" width="${w.toFixed(1)}" height="22" rx="4" fill="${d.color}" opacity="0.85"/>
+      <text x="${(x + w/2).toFixed(1)}" y="37" text-anchor="middle" fill="#070d0b" font-size="9.5" font-family="monospace" font-weight="700">${d.name}</text>`;
+  }).join('');
+  svg.innerHTML = backbone + rects;
+}
+
+function toggleExpand(id) {
+  document.getElementById(id).classList.toggle('expanded');
+}
+
+function copySeq(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied to clipboard'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ══════════════════════════════════════════════════
+//  TAXONOMY TREE
+// ══════════════════════════════════════════════════
+function renderTaxTree() {
+  const container = document.getElementById('tax-tree-content');
+  container.innerHTML = '';
+  renderTaxNodes(TAXONOMY_TREE, container, 0);
+}
+
+function renderTaxNodes(nodes, container, depth) {
+  nodes.forEach(n => {
+    const indent = ['', 'tax-indent', 'tax-indent2', 'tax-indent3', 'tax-indent4'][Math.min(depth, 4)];
+    const div = document.createElement('div');
+    div.className = `tax-node ${indent}`;
+    div.setAttribute('data-id', n.id);
+
+    const hasChildren = n.children && n.children.length > 0;
+    const isExpanded = expandedTaxNodes.has(n.id);
+
+    div.innerHTML = `
+      ${hasChildren ? `<span class="tax-toggle">${isExpanded ? '−' : '+'}</span>` : '<span style="width:14px;display:inline-block;"></span>'}
+      <span class="tax-rank">${n.rank}</span>
+      <span>${n.name}</span>`;
+
+    div.onclick = () => {
+      if(hasChildren) {
+        if(expandedTaxNodes.has(n.id)) expandedTaxNodes.delete(n.id);
+        else expandedTaxNodes.add(n.id);
+        renderTaxTree();
+      }
+      selectTaxon(n);
+    };
+
+    container.appendChild(div);
+    if(hasChildren && isExpanded) renderTaxNodes(n.children, container, depth + 1);
+  });
+}
+
+function selectTaxon(node) {
+  document.querySelectorAll('.tax-node').forEach(n => n.classList.remove('selected'));
+  document.querySelector(`[data-id="${node.id}"]`)?.classList.add('selected');
+
+  const panel = document.getElementById('tax-detail-content');
+  const species = SPECIES_MAP[node.id] || [];
+  const geneCount = GENE_DATA.filter(g =>
+    g.phylum.toLowerCase().includes(node.name.toLowerCase()) ||
+    g.family.toLowerCase().includes(node.name.toLowerCase()) ||
+    g.class.toLowerCase().includes(node.name.toLowerCase()) ||
+    g.order.toLowerCase().includes(node.name.toLowerCase())).length;
+
+  panel.innerHTML = `
+    <div style="margin-bottom:20px;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">${node.rank}</div>
+      <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;">${node.name}</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <span style="font-family:var(--mono);font-size:12px;color:var(--text3);">
+          <span style="color:var(--accent);font-weight:700;">${geneCount || (node.children?node.children.length*420:0)}</span> genes in DB
+        </span>
+        ${species.length?`<span style="font-family:var(--mono);font-size:12px;color:var(--text3);">
+          <span style="color:var(--accent);font-weight:700;">${species.length}</span> species shown</span>`:''}
+      </div>
+    </div>
+    ${species.length ? `
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;">Member Species</div>
+      <div class="tax-species-grid">
+        ${species.map(s=>`
+          <div class="species-card" onclick="document.getElementById('browse-filter').value='${s.sci}';filterTable();showPage('browse');">
+            <div class="species-sci">${s.sci}</div>
+            <div class="species-common">${s.common}</div>
+            <div class="species-stats">Genes: <span>${s.genes.toLocaleString()}</span> · TFs: <span>${s.tfs}</span></div>
+          </div>`).join('')}
+      </div>` : `<div style="color:var(--text3);font-size:13px;padding:20px 0;">Expand child nodes to see species, or navigate to a Family-level node.</div>`}`;
+}
+
+// ══════════════════════════════════════════════════
+//  AI ANALYSIS
+// ══════════════════════════════════════════════════
+function renderAITools() {
+  document.getElementById('ai-tool-btns').innerHTML = AI_TOOLS.map(t=>`
+    <button class="ai-tool-btn ${t.id===selectedAITool?'selected':''}" onclick="selectAITool('${t.id}')">
+      <div class="ai-tool-icon">${t.icon}</div>
+      <div class="ai-tool-name">${t.name}</div>
+      <div class="ai-tool-desc">${t.desc}</div>
+    </button>`).join('');
+}
+
+function selectAITool(id) {
+  selectedAITool = id;
+  renderAITools();
+  const tool = AI_TOOLS.find(t=>t.id===id);
+  document.getElementById('ai-input-label').textContent = tool.name + ' — Input';
+  if(tool.prompt && !document.getElementById('ai-input').value) {
+    // hint only
+  }
+}
+
+async function runAI() {
+  const inputVal = document.getElementById('ai-input').value.trim();
+  if(!inputVal) { showToast('Please enter a sequence or query'); return; }
+
+  const tool = AI_TOOLS.find(t=>t.id===selectedAITool);
+  const systemPrompt = `You are FungiGeneDB's AI assistant — a specialist in fungal genomics, transcription factors, mRNA biology, and mycology. 
+Provide detailed, accurate, scientifically rigorous analyses. Format your response in clear sections. 
+Focus on fungi-specific biology: TF families like Zn(II)2Cys6, Velvet, GATA; fungal metabolic regulation; pathogenicity; sporulation; secondary metabolism.
+Keep answers structured with labeled sections and use precise molecular biology terminology.`;
+
+  const userMessage = tool.prompt
+    ? `${tool.prompt}\n\n---\nInput:\n${inputVal}`
+    : inputVal;
+
+  const runBtn = document.getElementById('ai-run');
+  const spinner = document.getElementById('ai-spinner');
+  const btnText = document.getElementById('ai-btn-text');
+  const resultBox = document.getElementById('ai-result');
+  const resultBody = document.getElementById('ai-result-body');
+
+  runBtn.disabled = true;
+  spinner.classList.add('active');
+  btnText.textContent = 'Analyzing...';
+  resultBox.classList.add('visible');
+  resultBody.innerHTML = '<span class="typing-cursor"></span>';
+
+  try {
+    const GEMINI_API_KEY = "AIzaSyCTb3WPV3f0RYwauCTS0OItW1S_bbXPh_k";
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          role: "user",
+          parts: [{ text: systemPrompt + "\n\n" + userMessage }]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    if(data.error) throw new Error(data.error.message || "Gemini API Error");
+    
+    // Parse Gemini response structure
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
+    
+    // Optional: parse markdown basic bolding
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    resultBody.innerHTML = text.replace(/\n/g, '<br/>');
+
+  } catch(err) {
+    resultBody.textContent = '⚠ Analysis error: ' + err.message + '\n\nEnsure this app has API access enabled.';
+  } finally {
+    runBtn.disabled = false;
+    spinner.classList.remove('active');
+    btnText.textContent = 'Run Analysis →';
+  }
+}
+
+function clearAI() {
+  document.getElementById('ai-input').value = '';
+  document.getElementById('ai-result').classList.remove('visible');
+}
+
+async function handleGoogleCredentialResponse(response) {
+  const spin = document.getElementById('log-spinner');
+  spin.classList.add('active');
+  try {
+    const res = await fetch('/api/auth/google', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      showToast(d.message);
+      document.getElementById('nav-login-btn').textContent = d.username;
+      setTimeout(()=>showPage('home'), 1000);
+    } else {
+      alert("Google Auth failed: " + d.message);
+    }
+  } catch(e) { alert("Google Auth Server error"); }
+  spin.classList.remove('active');
+}
+
+async function submitSignup() {
+  const e = document.getElementById('reg-email').value;
+  const u = document.getElementById('reg-user').value;
+  const p = document.getElementById('reg-pass').value;
+  if(!e || !u || !p) return;
+  const msg = document.getElementById('reg-msg');
+  const spin = document.getElementById('reg-spinner');
+  spin.classList.add('active');
+  try {
+    const res = await fetch('/api/signup', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email:e, username:u, password:p})
+    });
+    const d = await res.json();
+    if(res.ok) {
+      msg.style.color = 'var(--accent)';
+      msg.textContent = d.message;
+      setTimeout(() => showPage('login'), 1500);
+    } else {
+      msg.style.color = 'var(--coral)';
+      msg.textContent = d.message || 'Error executing signup';
+    }
+  } catch(err) { msg.textContent = 'Server error during signup'; }
+  spin.classList.remove('active');
+}
+
+async function submitAdminLogin() {
+  const u = document.getElementById('admin-user').value;
+  const p = document.getElementById('admin-pass').value;
+  if(!u || !p) return;
+  const msg = document.getElementById('admin-msg');
+  const spin = document.getElementById('admin-spinner');
+  spin.classList.add('active');
+  try {
+    const res = await fetch('/api/admin/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username:u, password:p})
+    });
+    const d = await res.json();
+    if(res.ok) {
+      msg.style.color = 'var(--accent)';
+      msg.textContent = d.message;
+      setTimeout(() => { showPage('admin-dash'); loadAdminData(); }, 1000);
+    } else {
+      msg.style.color = 'var(--coral)';
+      msg.textContent = d.message || 'Error';
+    }
+  } catch(e) { msg.textContent = 'Server error'; }
+  spin.classList.remove('active');
+}
+
+async function loadAdminData() {
+  const tb = document.getElementById('admin-tbody');
+  tb.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+  try {
+    const res = await fetch('/api/genes');
+    const { genes } = await res.json();
+    GENE_DATA.length = 0;
+    GENE_DATA.push(...genes);
+    tb.innerHTML = genes.map(g => `
+      <tr>
+        <td>${g.id}</td>
+        <td>${g.name}</td>
+        <td>${g.species}</td>
+        <td>${g.type}</td>
+        <td><button onclick="deleteAdminGene('${g.id}')" style="background:var(--coral);color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;">Delete</button></td>
+      </tr>
+    `).join('');
+    renderTable(GENE_DATA);
+  } catch(e) { tb.innerHTML = '<tr><td colspan="5">Error loading data</td></tr>'; }
+}
+
+async function deleteAdminGene(id) {
+  if(!confirm("Are you sure you want to delete this gene?")) return;
+  try {
+    const res = await fetch('/api/admin/gene/' + id, { method: 'DELETE' });
+    if(res.ok) {
+      showToast("Gene Deleted!");
+      loadAdminData();
+    } else {
+      alert("Failed to delete gene.");
+    }
+  } catch(e) { alert("Server error"); }
+}
+
+async function showAdminAddModal() {
+  const name = prompt("Enter Gene Name (e.g., TF123):");
+  if(!name) return;
+  const species = prompt("Enter Species (e.g., Aspergillus niger):");
+  if(!species) return;
+  const newGene = {
+    name, species, type:'TF', tfFamily:'Unclassified', function:'Custom manually added', chr:'Unknown', strand:'+', accession:'Custom', refs:{}
+  };
+  try {
+    const res = await fetch('/api/admin/gene', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(newGene)
+    });
+    if(res.ok) {
+      showToast("Gene Added!");
+      loadAdminData();
+    } else {
+      alert("Failed to add gene.");
+    }
+  } catch(e) { alert("Server error"); }
+}
+
+async function submitLogin() {
+  const u = document.getElementById('log-user').value;
+  const p = document.getElementById('log-pass').value;
+  if(!u || !p) return;
+  const btn = document.getElementById('nav-login-btn');
+  const msg = document.getElementById('log-msg');
+  const spin = document.getElementById('log-spinner');
+  spin.classList.add('active');
+  try {
+    const res = await fetch('/api/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username:u, password:p})
+    });
+    const d = await res.json();
+    if(res.ok) {
+      msg.style.color = 'var(--accent)';
+      msg.textContent = d.message;
+      btn.textContent = u; 
+      setTimeout(()=>showPage('home'), 1000);
+    } else {
+      msg.style.color = 'var(--coral)';
+      msg.textContent = d.message || 'Error';
+    }
+  } catch(e) { msg.textContent = 'Server error'; }
+  spin.classList.remove('active');
+}
+
+async function submitUpload() {
+  const n = document.getElementById('up-name').value;
+  const s = document.getElementById('up-species').value;
+  const q = document.getElementById('up-seq').value;
+  const msg = document.getElementById('up-msg');
+  const spin = document.getElementById('up-spinner');
+  spin.classList.add('active');
+  msg.textContent = '';
+  try {
+    const res = await fetch('/api/upload', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name:n, species:s, sequence:q})
+    });
+    const d = await res.json();
+    if(res.ok) {
+      msg.style.color = 'var(--accent)';
+      msg.textContent = d.message;
+      document.getElementById('up-name').value = '';
+      document.getElementById('up-species').value = '';
+      document.getElementById('up-seq').value = '';
+    } else {
+      msg.style.color = 'var(--coral)';
+      msg.textContent = d.message;
+    }
+  } catch(e) { msg.textContent='Error uploading'; }
+  spin.classList.remove('active');
+}
+
+function analyzeCurrentGene() {
+  if(!currentGene) return;
+  const seq = SEQUENCES[currentGene.seqKey]||SEQUENCES.areA;
+  document.getElementById('ai-input').value =
+    `Gene: ${currentGene.name} (${currentGene.id})\nSpecies: ${currentGene.species}\nTF Family: ${currentGene.tfFamily}\nFunction: ${currentGene.function}\n\nmRNA sequence:\n${seq.mrna.substring(0,300)}...\n\nCDS:\n${seq.cds.substring(0,300)}...`;
+  selectedAITool = 'sequence';
+  renderAITools();
+  showPage('ai');
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+renderHome();
+filterTable();
+renderAITools();
+</script>
+</body>
+</html>

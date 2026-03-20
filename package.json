@@ -1,0 +1,21 @@
+{
+  "name": "mycotf-backend",
+  "version": "1.0.0",
+  "description": "MycoTF Fungi TF Explorer — Node.js/Express backend",
+  "main": "server.js",
+  "scripts": {
+    "start":   "node server.js",
+    "dev":     "nodemon server.js",
+    "prod":    "NODE_ENV=production node server.js"
+  },
+  "dependencies": {
+    "cors":       "^2.8.5",
+    "express":    "^4.19.2",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": { "node": ">=18.0.0" }
+}
